@@ -92,7 +92,7 @@ If you only send occasional links and never need to justify spend, you do not ne
 ### Option A — Claude Code skill (recommended)
 
 ```bash
-git clone https://github.com/luisroquette/My_UTMs_Make_Me_Proud.git ~/.claude/skills/my-utms-make-me-proud
+git clone https://github.com/luisroquette-labs/My_UTMs_Make_Me_Proud.git ~/.claude/skills/my-utms-make-me-proud
 ```
 
 Then restart Claude Code — the skill loads as `my-utms-make-me-proud`. No API keys, no services, no runtime dependencies: the repository is plain Markdown contracts plus one deterministic Python validator.
@@ -101,7 +101,7 @@ Then restart Claude Code — the skill loads as `my-utms-make-me-proud`. No API 
 
 ```bash
 # read before running, as always
-curl -L https://github.com/luisroquette/My_UTMs_Make_Me_Proud/archive/refs/heads/main.tar.gz | tar xz
+curl -L https://github.com/luisroquette-labs/My_UTMs_Make_Me_Proud/archive/refs/heads/main.tar.gz | tar xz
 mv My_UTMs_Make_Me_Proud-main my-utms-make-me-proud
 ```
 
@@ -519,7 +519,7 @@ The second integration landed: the email marketing contract.
 - **`references/integracoes/mailmkt.md`** — extracted from the CF Gauss production binding (18/08/2026): one idempotent `mailmkt-<slug>` link per campaign run, `mailmkt_` UTM prefix, double tracking (`/t/` + per-recipient nurture events), the send-time raw-URL gate, coupon-token expiry, and the documented absence of per-recipient links.
 - The integration template now points at `mailmkt.md` as the reference email example.
 
-Changelog: [CHANGELOG.md](./CHANGELOG.md) · Releases: [GitHub Releases](https://github.com/luisroquette/My_UTMs_Make_Me_Proud/releases)
+Changelog: [CHANGELOG.md](./CHANGELOG.md) · Releases: [GitHub Releases](https://github.com/luisroquette-labs/My_UTMs_Make_Me_Proud/releases)
 
 ---
 
@@ -637,7 +637,7 @@ The bar is one rule: **every fix to a validator rule lands with its regression c
 **Luis Roquette** — Anthropic Select Services Partner, building the CF Gauss marketing stack (LP engine → email engine → tracking) as portable, auditable open-source skills.
 
 <p align="center">
-  <a href="https://github.com/luisroquette/My_LP_Makes_Neil_Proud">My_LP_Makes_Neil_Proud</a> ·
-  <a href="https://github.com/luisroquette/My_MailMKT_makes_Neil_Proud">My_MailMKT_makes_Neil_Proud</a> ·
-  <a href="https://github.com/luisroquette/My_UTMs_Make_Me_Proud">My_UTMs_Make_Me_Proud</a>
+  <a href="https://github.com/luisroquette-labs/My_LP_Makes_Neil_Proud">My_LP_Makes_Neil_Proud</a> ·
+  <a href="https://github.com/luisroquette-labs/My_MailMKT_makes_Neil_Proud">My_MailMKT_makes_Neil_Proud</a> ·
+  <a href="https://github.com/luisroquette-labs/My_UTMs_Make_Me_Proud">My_UTMs_Make_Me_Proud</a>
 </p>
