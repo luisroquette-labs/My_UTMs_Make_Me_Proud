@@ -35,8 +35,6 @@ import sys
 from datetime import date, timedelta
 from html import escape
 
-# ---------------------------------------------------------------------------
-# Input contract (see docs/superpowers/specs/2026-08-18-dashboard-skill-design.md)
 
 LINK_FIELDS = ["slug", "name", "destination_url", "utm_source", "utm_medium",
                "utm_campaign", "is_active", "expires_at", "saude"]
@@ -113,8 +111,6 @@ def validar(dados):
         if "type" in conv and conv["type"] not in CONV_TYPES:
             erros.append(f"{onde}: type inválido: {conv['type']!r}")
 
-    # Unknown slugs: an aggregate/event/conversion pointing at nothing is
-    # export corruption, not silence — named error, never ignored.
     for nome, lista, campo in (("daily_aggregates", dados["daily_aggregates"], "day"),
                                ("events", dados["events"], "clicked_at"),
                                ("conversions", dados["conversions"], "converted_at")):
@@ -126,8 +122,6 @@ def validar(dados):
     return erros
 
 
-# ---------------------------------------------------------------------------
-# Model (pure data — what the self-test asserts)
 
 def status_link(link, report_date):
     """Derived status, deterministic precedence: paused > expired > broken > active."""
@@ -138,7 +132,7 @@ def status_link(link, report_date):
             if date.fromisoformat(str(link["expires_at"])[:10]) < report_date:
                 return "expirado"
         except ValueError:
-            pass  # malformed expiry is an export problem, not a status
+            pass
     if link.get("saude") == "broken":
         return "quebrado"
     return "ativo"
@@ -173,7 +167,6 @@ def construir(dados):
         "clicks": {n: clicks_janela(l["slug"], n) for n in WINDOWS},
     } for l in links_ordenados]
 
-    # Origin breakdown — event UTM snapshots only (history is immutable).
     eventos = dados["events"]
     def origem_de(ev):
         return (ev["utm_source"], ev["utm_medium"])
@@ -198,9 +191,6 @@ def construir(dados):
         if conv["slug"] in conversoes:
             conversoes[conv["slug"]][conv["type"]] += 1
 
-    # Calendar-filled series per link — missing day is None ("—"),
-    # a row with clicks 0 is a measured zero (0). The 30-day grid renders
-    # this per top-5 link; window totals come from the same aggregates.
     serie_top5 = []
     for tl in top_links[:5]:
         por_dia = clicks_por_slug.get(tl["slug"], {})
@@ -238,8 +228,6 @@ def csv_links(dados, modelo):
     return buf.getvalue()
 
 
-# ---------------------------------------------------------------------------
-# Render (single-file HTML, zero JavaScript, offline)
 
 CSS = """
 :root { --ink:#1A1524; --ink-soft:#4A4458; --lilas:#C9A7FF; --brand:#7B2FBE;
@@ -354,8 +342,6 @@ def render(modelo, csv_data_uri):
         )
 
     def total_janela(n):
-        # serie_global covers 90 days ending at report_date; the window totals
-        # come from the aggregate sums per link (same source of truth).
         return sum(tl["clicks"][n] for tl in m["top_links"])
 
     resumo = (
@@ -445,8 +431,6 @@ def gerar(dados, caminho_saida):
     return modelo
 
 
-# ---------------------------------------------------------------------------
-# Self-test — the ledger of bugs that were real (same philosophy as the validator)
 
 def _fixture():
     return {
@@ -468,14 +452,10 @@ def _fixture():
              "is_active": False, "expires_at": "2026-08-01T00:00:00Z", "saude": "broken"},
         ],
         "daily_aggregates": [
-            # Link A: clicks on 08-16 and 08-18, 08-17 deliberately missing.
             {"slug": "lp-a", "day": "2026-08-16", "clicks": 5},
             {"slug": "lp-a", "day": "2026-08-18", "clicks": 2},
-            # Link A: an old click outside the 7d window but inside 30d.
             {"slug": "lp-a", "day": "2026-07-25", "clicks": 3},
-            # Link B: measured zero on the report date.
             {"slug": "lp-b", "day": "2026-08-18", "clicks": 0},
-            # Link C: one click, inside 7d.
             {"slug": "lp-c", "day": "2026-08-15", "clicks": 1},
         ],
         "events": [
@@ -513,7 +493,6 @@ def _sistema_de_teste():
     def _1():
         dados = _fixture()
         modelo = construir(dados)
-        # série do Link A na janela de 30 dias: 08-17 ausente, sem linha zero.
         serie_a = next(s for s in modelo["serie_top5"] if s["slug"] == "lp-a")
         por_dia = dict(serie_a["dias"])
         assert por_dia[date(2026, 8, 17)] is None, "dia sem linha deve ser None"
@@ -521,7 +500,6 @@ def _sistema_de_teste():
         serie_b = next(s for s in modelo["serie_top5"] if s["slug"] == "lp-b")
         por_dia_b = dict(serie_b["dias"])
         assert por_dia_b[date(2026, 8, 18)] == 0, "zero medido deve ser 0"
-        # Render: ausência vira '—', zero vira célula zero.
         csv_uri = "data:text/csv;base64,"
         html = render(modelo, csv_uri)
         assert '<div class="cell empty" title="no data">—</div>' in html
@@ -546,7 +524,6 @@ def _sistema_de_teste():
     def _4():
         modelo = construir(_fixture())
         a = next(tl for tl in modelo["top_links"] if tl["slug"] == "lp-a")
-        # 08-16 e 08-18 dentro de 7d; 07-25 fora de 7d mas dentro de 30d.
         assert a["clicks"][7] == 7
         assert a["clicks"][30] == 10
         assert a["clicks"][90] == 10
@@ -596,10 +573,10 @@ def _sistema_de_teste():
         assert linhas[0][0] == "slug"
         por_slug = {l[0]: l for l in linhas[1:]}
         assert len(por_slug) == 5
-        assert por_slug["lp-a"][-1] == "1"          # purchases
-        assert por_slug["lp-a"][-2] == "2"          # leads
-        assert por_slug["lp-b"][-2] == "0"          # explicit zero
-        assert por_slug["lp-e"][9] == "pausado"     # derived status column
+        assert por_slug["lp-a"][-1] == "1"
+        assert por_slug["lp-a"][-2] == "2"
+        assert por_slug["lp-b"][-2] == "0"
+        assert por_slug["lp-e"][9] == "pausado"
 
     return casos
 

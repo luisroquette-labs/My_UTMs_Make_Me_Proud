@@ -43,7 +43,6 @@ def erros_link(link):
             erros.append("destination_url: must be query-free (tracked URL is destination + utm params)")
         if parsed.username or parsed.password:
             erros.append("destination_url: credentials embedded in URL")
-        # case-insensitive: /T/ is the same loop
         if parsed.path.lower().startswith("/t/"):
             erros.append("destination_url: must not point to another tracking link (/t/ loop)")
 
